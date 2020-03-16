@@ -1,9 +1,9 @@
-package utils
+package service
 
 type Request struct {
-	Data []string
+	datos []string
 }
 
 type Response struct {
-	Result bool
+	resultado string
 }

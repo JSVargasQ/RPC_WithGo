@@ -17,4 +17,6 @@ func main() {
 	if error != nil {
 		log.Fatal("Error de servicio de registro:", error)
 	}
+
+	rpc.HandleHTTP()
 }

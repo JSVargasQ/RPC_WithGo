@@ -1,23 +1,39 @@
 package utils
 
+type Request struct {
+	datos []string
+}
+
+type Response1 struct {
+	resultado1 []string
+}
+
+type Response2 struct {
+	resultado2 [][]string
+}
+
+type Chat int
 
 var usuarios []string
 
 var mensajes [][]string 
 
-type Chat int
 
-func registrarUsuario(pUserName string) {
+func (c *Chat) registrarUsuario(rq *Request, rp1 *Response1, rp2 *Response2) error {
 
-	usuarios = append(usuarios, pUserName)
-
+	usuarios = append(usuarios, rq.datos[0])
+	rp1.resultado1 = usuarios
+	return nil
 }
 
-func guardarMensaje(pMensaje string, pUsuario string, pDate string, pIp string) {
+func (c *Chat) guardarMensaje(rq *Request, rp1 *Response1, rp2 *Response2) error {
 
-	fila := []string{pMensaje, pUsuario, pDate, pIp}
+	fila := []string{rq.datos[0], rq.datos[1], rq.datos[2], rq.datos[3]}
 
 	mensajes = append( mensajes, fila )
+
+	rp2.resultado2 = mensajes
+	return nil
 }
 
 

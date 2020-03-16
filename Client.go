@@ -71,6 +71,7 @@ func (c *ChatClient) CheckMessages() {
 
 	for {
 		err := c.Client.Call("ChatServer.CheckMessages", c.Username, &reply)
+
 		if err != nil {
 			log.Fatalln("Chat has been shutdown. Goodbye.")
 		}
@@ -176,7 +177,15 @@ func createClientFromFlags() (*ChatClient, error) {
 	var c *ChatClient = &ChatClient{}
 	var host string
 
-	flag.StringVar(&c.Username, "user", "Sagrav", "Your username")
+	log.Println("Ingrese su NickName:")
+	reader := bufio.NewReader(os.Stdin)
+	userName, err := reader.ReadString('\n')
+
+	if err != nil {
+		log.Printf("Error: %q\n", err)
+	}
+
+	flag.StringVar(&c.Username, "user", userName, "Your username")
 	flag.StringVar(&host, "host", "localhost", "The host you want to connect to")
 
 	flag.Parse()
@@ -207,6 +216,7 @@ func mainLoop(c *ChatClient) {
 	for {
 		reader := bufio.NewReader(os.Stdin)
 		line, err := reader.ReadString('\n')
+
 		if err != nil {
 			log.Printf("Error: %q\n", err)
 		}
@@ -243,7 +253,9 @@ func main() {
 	client.Register()
 
 	// Listen for messages
+	log.Println("A")
 	go client.CheckMessages()
+	log.Println("B")
 
 	mainLoop(client)
 }
