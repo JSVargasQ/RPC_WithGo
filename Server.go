@@ -27,7 +27,7 @@ type ChatServer struct {
 // Register registers a client username with the chat server.
 // It sends a message to all users notifying a user has joined
 func (c *ChatServer) Register(username string, reply *string) error {
-	*reply = "Welcome to GoChat v1.0!\n"
+	*reply = "Bienvenido a GoChat v1.0!\n"
 	*reply += "List of users online:\n"
 
 	c.users = append(c.users, username)
@@ -41,7 +41,7 @@ func (c *ChatServer) Register(username string, reply *string) error {
 		c.messageQueue[k] = append(c.messageQueue[k], username+" has joined.")
 	}
 
-	log.Printf("%s has joined the chat.\n", username)
+	log.Printf("El usuario %s ha entrado al chat.\n", username)
 
 	return nil
 }
@@ -82,7 +82,7 @@ func (c *ChatServer) Tell(msg Message, reply *Nothing) error {
 func (c *ChatServer) Say(msg Message, reply *Nothing) error {
 
 	for k, v := range c.messageQueue {
-		m := msg.User + " says " + msg.Msg
+		m := msg.User + " dice: " + msg.Msg
 		c.messageQueue[k] = append(v, m)
 	}
 
@@ -105,7 +105,7 @@ func (c *ChatServer) Logout(username string, reply *Nothing) error {
 		c.messageQueue[k] = append(v, username+" has logged out.")
 	}
 
-	fmt.Println("User " + username + " has logged out.")
+	fmt.Println("El usuario " + username + " ha salido.")
 
 	*reply = false
 
@@ -114,7 +114,7 @@ func (c *ChatServer) Logout(username string, reply *Nothing) error {
 
 func (elt *ChatServer) Shutdown(nothing Nothing, reply *Nothing) error {
 
-	log.Println("Server shutdown...Goodbye.")
+	log.Println("El servidor se da de baja...Adios.")
 	*reply = false
 	elt.shutdown <- true
 
@@ -132,23 +132,27 @@ func RunServer(cs *ChatServer) {
 	rpc.Register(cs)
 	rpc.HandleHTTP()
 
-	log.Printf("Listening on port %s...\n", cs.port)
+	log.Printf("Escuchando por el puerto %s\n", cs.port)
 
 	l, err := net.Listen("tcp", cs.port)
 	if err != nil {
-		log.Panicf("Can't bind port to listen. %q", err)
+		log.Panicf("No se puede utilizar el puerto. %q", err)
 	}
 
 	go http.Serve(l, nil)
 }
 
 func main() {
+
 	cs := new(ChatServer)
 	cs.messageQueue = make(map[string][]string)
+
 	cs.shutdown = make(chan bool, 1)
 
 	parseFlags(cs)
 	RunServer(cs)
+	
+	<- cs.shutdown
 
-	<-cs.shutdown
+	fmt.Println(1)
 }

@@ -176,7 +176,7 @@ func createClientFromFlags() (*ChatClient, error) {
 	var c *ChatClient = &ChatClient{}
 	var host string
 
-	flag.StringVar(&c.Username, "user", "fred", "Your username")
+	flag.StringVar(&c.Username, "user", "Sagrav", "Your username")
 	flag.StringVar(&host, "host", "localhost", "The host you want to connect to")
 
 	flag.Parse()
