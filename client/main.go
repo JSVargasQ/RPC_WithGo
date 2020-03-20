@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"log"
+	"fmt"
 	"net/rpc"
 	"os"
 	"strings"
@@ -29,10 +30,12 @@ func verificarMensajes(pClient *rpc.Client, reply Chat, pNick string) {
 
 			if i == ultimoMensaje {
 				continue
-			} else if msg[i][1] == pNick {
+			} else if msg[i][1] == pNick && msg[i][2] == "0" {
 				log.Println("Tu: " +  msg[i][0])
-			} else {
+			} else if msg[i][1] != pNick && msg[i][2] == "0" {
 				log.Println(msg[i][1] +  " dice: " +  msg[i][0])
+			} else {
+				log.Println(msg[i][0])
 			}
 
 		}
@@ -49,7 +52,8 @@ func mainLoop( pLector *bufio.Reader, pClient *rpc.Client, pNick string, pReply 
 	nick := pNick
 	lector :=  pLector
 
-	ultimoMensaje = 0;
+	ultimoMensaje = 0
+
 	go verificarMensajes(pClient, reply, nick )
 
 	for {
@@ -61,13 +65,13 @@ func mainLoop( pLector *bufio.Reader, pClient *rpc.Client, pNick string, pReply 
 			log.Printf("Error: %q\n", error)
 		}
 
-		if strings.HasPrefix(entrada, "salir") {
+		if strings.HasPrefix(entrada, "/salir") || strings.HasPrefix(entrada, "/SALIR") {
 
 			pClient.Call("APP.UsuarioSalir", nick , &reply)
 			break
 		} else {
 
-			pClient.Call("APP.RegistrarMensaje", []string {entrada, nick} , &reply)
+			pClient.Call("APP.RegistrarMensaje", []string {entrada, nick, "0"} , &reply)
 		}
 	}	
 }
@@ -108,19 +112,21 @@ func main() {
 	log.Println("Bienvenido " + nickname + "\n")
 
 
-	log.Printf("Usuarios ON:")
+	fmt.Println("Usuarios ON:")
 	for i := range reply.Usuarios {
 
 		if reply.Usuarios[i] == nickname {
-			log.Println(reply.Usuarios[i] + " (Yo)") 
+			fmt.Println(reply.Usuarios[i] + " (Yo)") 
 		} else {
-			log.Println(reply.Usuarios[i])
+			fmt.Println(reply.Usuarios[i])
 		} 
-
-		log.Println("")
 	}
 
-	
+	fmt.Println("")
+
+	fmt.Println("Si quieres salir del chat, ingresa el comando '/salir'")
+
+	fmt.Println("")
 
 	mainLoop(lector, client, nickname, reply)
 

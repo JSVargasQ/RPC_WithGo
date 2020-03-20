@@ -6,11 +6,17 @@ import (
 	"net"
 	"net/http"
 	"net/rpc"
+	"bufio"
+	"os"
+	"strings"
+	"fmt"
+	"time"
 )
 
 type Chat struct {
 	Usuarios []string
 	Mensajes [][]string
+	
 }
 
 type APP int
@@ -34,13 +40,17 @@ func (a *APP) ObtenerMensajes(empty string, reply *Chat) error {
 func (a *APP) RegistrarUsuario(pUserName string, reply *Chat) error {
 	chatRoom.Usuarios = append(chatRoom.Usuarios, pUserName)
 	log.Println("El usuario " + pUserName + " ha entrado al chat.")
+
+	fila := []string{"El usuario " + pUserName + " ha entrado al chat.", pUserName, "1"}
+	chatRoom.Mensajes = append(chatRoom.Mensajes, fila)
+
 	*reply = chatRoom
 	return nil
 }
 
 func (a *APP) RegistrarMensaje(pMensaje []string, reply *Chat) error {
 	
-	fila := []string{pMensaje[0], pMensaje[1]}
+	fila := []string{pMensaje[0], pMensaje[1], "0"}
 
 	chatRoom.Mensajes = append(chatRoom.Mensajes, fila)
 
@@ -73,6 +83,34 @@ func (a *APP) UsuarioSalir(pUserName string, replt *Chat)  error {
 	return nil
 }
 
+func input() {
+
+	lector := bufio.NewReader(os.Stdin)
+	entrada, error := lector.ReadString('\n')
+	entrada = strings.TrimSpace(entrada)
+
+	if error != nil {
+		log.Printf("Error: %q\n", error)
+	}
+
+	if strings.HasPrefix(entrada, "/apagar") || strings.HasPrefix(entrada, "/APAGAR") {
+
+		fila := []string{"El servidor se ha dado de baja", "", "1"}
+		chatRoom.Mensajes = append(chatRoom.Mensajes, fila)
+
+		fila = []string{"Para salir de la conversación ingresa '/salir'", "", "1"}
+		chatRoom.Mensajes = append(chatRoom.Mensajes, fila)
+
+		time.Sleep(3 * time.Second)
+
+		fmt.Println("")
+		fmt.Println("El servidor se da de baja.")
+		
+		os.Exit(1)
+
+	}
+	
+}
 
 
 func main() {
@@ -82,7 +120,7 @@ func main() {
 	err := rpc.Register(api)
 
 	if err != nil {
-		log.Fatal("error registering API", err)
+		log.Fatal("Error API", err)
 	}
 
 	rpc.HandleHTTP()
@@ -90,13 +128,19 @@ func main() {
 	listener, err := net.Listen("tcp", ":4040")
 
 	if err != nil {
-		log.Fatal("Listener error", err)
+		log.Fatal("Error de escucha", err)
 	}
-	log.Printf("serving rpc on port %d", 4040)
+
+	log.Printf("Servidor RPC en el puerto %d", 4040)
+	
+	fmt.Println("Para apagar el servidor ingresa '/apagar'")
+	fmt.Println("")
+
+	go input()
 	http.Serve(listener, nil)
 
 	if err != nil {
-		log.Fatal("error serving: ", err)
+		log.Fatal("Error: ", err)
 	}
 
 	
