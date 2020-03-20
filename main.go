@@ -24,6 +24,11 @@ func (a *APP) ObtenerDatos(empty string, reply *Chat) error {
 	return nil
 }
 
+func (a *APP) ObtenerMensajes(empty string, reply *Chat) error {
+	*reply = chatRoom
+	return nil
+}
+
 
 
 func (a *APP) RegistrarUsuario(pUserName string, reply *Chat) error {
@@ -38,6 +43,8 @@ func (a *APP) RegistrarMensaje(pMensaje []string, reply *Chat) error {
 	fila := []string{pMensaje[0], pMensaje[1]}
 
 	chatRoom.Mensajes = append(chatRoom.Mensajes, fila)
+
+	log.Println("El usuario " + pMensaje[1] + " dice: " + pMensaje[0])
 
 	*reply = chatRoom
 	return nil
@@ -59,11 +66,14 @@ func (a *APP) UsuarioSalir(pUserName string, replt *Chat)  error {
 	for i := range chatRoom.Usuarios {
 		if chatRoom.Usuarios[i] == pUserName {
 			chatRoom.Usuarios = append(chatRoom.Usuarios[:i], chatRoom.Usuarios[i+1:]...)
+			log.Println("El usuaio " + pUserName + " ha abandonado el chat.")
 			break
 		}
 	}
 	return nil
 }
+
+
 
 func main() {
 
@@ -89,25 +99,7 @@ func main() {
 		log.Fatal("error serving: ", err)
 	}
 
-	// fmt.Println("initial database: ", database)
-	// a := Item{"first", "a test item"}
-	// b := Item{"second", "a second item"}
-	// c := Item{"third", "a third item"}
-
-	// AddItem(a)
-	// AddItem(b)
-	// AddItem(c)
-	// fmt.Println("second database: ", database)
-
-	// DeleteItem(b)
-	// fmt.Println("third database: ", database)
-
-	// EditItem("third", Item{"fourth", "a new item"})
-	// fmt.Println("fourth database: ", database)
-
-	// x := GetByName("fourth")
-	// y := GetByName("first")
-	// fmt.Println(x, y)
+	
 
 }
 

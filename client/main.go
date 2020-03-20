@@ -15,24 +15,59 @@ type Chat struct {
 
 var nickname string
 
-func mainLoop( pLector *bufio.Reader ) {
+var ultimoMensaje int
+
+func verificarMensajes(pClient *rpc.Client, reply Chat, pNick string) {
+
+	for {
+
+		pClient.Call("APP.ObtenerMensajes", "" , &reply)
+
+		msg := reply.Mensajes
+
+		for i := ultimoMensaje; i <= len(msg)-1; i++ {
+
+			if i == ultimoMensaje {
+				continue
+			} else if msg[i][1] == pNick {
+				log.Println("Tu: " +  msg[i][0])
+			} else {
+				log.Println(msg[i][1] +  " dice: " +  msg[i][0])
+			}
+
+		}
+
+		ultimoMensaje = len(msg)-1
+
+	}
+
+}
+
+func mainLoop( pLector *bufio.Reader, pClient *rpc.Client, pNick string, pReply Chat ) {
 	
+	reply := pReply
+	nick := pNick
 	lector :=  pLector
+
+	ultimoMensaje = 0;
+	go verificarMensajes(pClient, reply, nick )
 
 	for {
 
 		entrada, error := lector.ReadString('\n')
+		entrada = strings.TrimSpace(entrada)
 
 		if error != nil {
 			log.Printf("Error: %q\n", error)
 		}
 
-		log.Println(entrada)
-		
 		if strings.HasPrefix(entrada, "salir") {
 
-			//client.Call("APP.UsuarioSalir", nickname , &reply)
+			pClient.Call("APP.UsuarioSalir", nick , &reply)
 			break
+		} else {
+
+			pClient.Call("APP.RegistrarMensaje", []string {entrada, nick} , &reply)
 		}
 	}	
 }
@@ -41,9 +76,10 @@ func main() {
 
 	var reply Chat
 
+
 	client, err := rpc.DialHTTP("tcp", "localhost:4040")
 
-
+	//log.Println(reflect.TypeOf(client))
 
 	if err != nil {
 		log.Fatal("Error de conexion: ", err)
@@ -74,10 +110,19 @@ func main() {
 
 	log.Printf("Usuarios ON:")
 	for i := range reply.Usuarios {
-		log.Println(reply.Usuarios[i])
+
+		if reply.Usuarios[i] == nickname {
+			log.Println(reply.Usuarios[i] + " (Yo)") 
+		} else {
+			log.Println(reply.Usuarios[i])
+		} 
+
+		log.Println("")
 	}
 
-	mainLoop(lector)
+	
+
+	mainLoop(lector, client, nickname, reply)
 
 
 }
