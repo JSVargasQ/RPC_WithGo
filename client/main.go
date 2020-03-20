@@ -123,8 +123,6 @@ func main() {
 
 	client, err := rpc.DialHTTP("tcp", "localhost:4040")
 
-	//log.Println(reflect.TypeOf(client))
-
 	if err != nil {
 		log.Fatal("Error de conexion: ", err)
 	}
