@@ -67,6 +67,10 @@ func (a *APP) UsuarioExiste(pUserName string, replt *Chat)  error {
 
 		return errors.New("Nickname no valido.")
 	
+	} else if len(pUserName) < 4 || len(pUserName) > 15 {
+		
+		return errors.New("El Nickname debe tener como minimo 4 caracteres y maximo 15.")
+
 	}
 
 	for i := range chatRoom.Usuarios {
@@ -84,6 +88,10 @@ func (a *APP) UsuarioSalir(pUserName string, replt *Chat)  error {
 		if chatRoom.Usuarios[i] == pUserName {
 			chatRoom.Usuarios = append(chatRoom.Usuarios[:i], chatRoom.Usuarios[i+1:]...)
 			log.Println("El usuaio " + pUserName + " ha abandonado el chat.")
+
+			fila := []string{"El usuario " + pUserName + " ha abandonado el chat.", pUserName, "1"}
+			chatRoom.Mensajes = append(chatRoom.Mensajes, fila)
+			
 			break
 		}
 	}
