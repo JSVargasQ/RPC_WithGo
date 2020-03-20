@@ -80,6 +80,7 @@ func mainLoop( pLector *bufio.Reader, pClient *rpc.Client, pNick string, pReply 
 			
 		} else if strings.HasPrefix(entrada, "/salir") || strings.HasPrefix(entrada, "/SALIR") {
 
+			fmt.Println("Has abandonado el chat.")
 			pClient.Call("APP.UsuarioSalir", nick , &reply)
 			break
 		} else if strings.HasPrefix(entrada, "/usuarios") || strings.HasPrefix(entrada, "/usuarios") {
