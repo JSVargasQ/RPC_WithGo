@@ -38,6 +38,7 @@ func (a *APP) ObtenerMensajes(empty string, reply *Chat) error {
 
 
 func (a *APP) RegistrarUsuario(pUserName string, reply *Chat) error {
+
 	chatRoom.Usuarios = append(chatRoom.Usuarios, pUserName)
 	log.Println("El usuario " + pUserName + " ha entrado al chat.")
 
@@ -62,10 +63,16 @@ func (a *APP) RegistrarMensaje(pMensaje []string, reply *Chat) error {
 
 func (a *APP) UsuarioExiste(pUserName string, replt *Chat)  error {
 
+	if strings.TrimSpace(pUserName) == "" {
+
+		return errors.New("Nickname no valido.")
+	
+	}
+
 	for i := range chatRoom.Usuarios {
 		if chatRoom.Usuarios[i] == pUserName {
 			
-			return errors.New("Nickname existe")
+			return errors.New("El Nickname ya esta en uso.")
 		}
 	}
 	return nil

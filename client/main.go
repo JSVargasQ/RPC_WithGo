@@ -54,6 +54,8 @@ func mainLoop( pLector *bufio.Reader, pClient *rpc.Client, pNick string, pReply 
 
 	ultimoMensaje = 0
 
+	listarUsuarios(pClient, reply)
+
 	go verificarMensajes(pClient, reply, nick )
 
 	for {
@@ -65,10 +67,25 @@ func mainLoop( pLector *bufio.Reader, pClient *rpc.Client, pNick string, pReply 
 			log.Printf("Error: %q\n", error)
 		}
 
-		if strings.HasPrefix(entrada, "/salir") || strings.HasPrefix(entrada, "/SALIR") {
+		if strings.TrimSpace(entrada) == "" {
+
+		
+		} else if strings.HasPrefix(entrada, "/help") || strings.HasPrefix(entrada, "/HELP") {
+
+			fmt.Println("")
+			fmt.Println("'/salir' - Abandonas el chat.")
+			fmt.Println("'/usuarios' - Lista los usuarios que estan actualmente ON.")
+			fmt.Println("'-texto-' - Envias un mensaje al chat.")
+			fmt.Println("")
+			
+		} else if strings.HasPrefix(entrada, "/salir") || strings.HasPrefix(entrada, "/SALIR") {
 
 			pClient.Call("APP.UsuarioSalir", nick , &reply)
 			break
+		} else if strings.HasPrefix(entrada, "/usuarios") || strings.HasPrefix(entrada, "/usuarios") {
+
+			listarUsuarios(pClient, reply)
+
 		} else {
 
 			pClient.Call("APP.RegistrarMensaje", []string {entrada, nick, "0"} , &reply)
@@ -76,10 +93,32 @@ func mainLoop( pLector *bufio.Reader, pClient *rpc.Client, pNick string, pReply 
 	}	
 }
 
+func listarUsuarios(pClient *rpc.Client, pReply Chat) {
+
+	reply := pReply
+
+	fmt.Println("")
+
+	pClient.Call("APP.ObtenerDatos", "" , &reply)
+
+	fmt.Println("Usuarios ON:")
+	for i := range reply.Usuarios {
+
+		if reply.Usuarios[i] == nickname {
+			fmt.Println(reply.Usuarios[i] + " (Yo)") 
+		} else {
+			fmt.Println(reply.Usuarios[i])
+		} 
+	}
+
+	fmt.Println("")
+
+}
+
+
 func main() {
 
 	var reply Chat
-
 
 	client, err := rpc.DialHTTP("tcp", "localhost:4040")
 
@@ -103,30 +142,16 @@ func main() {
 
 	if err != nil {
 		log.Println("ERROR")
-		log.Fatal("Nickname en uso. Intente con otro")
+		log.Fatal( err )
 	} 
-
-	// client.Call("APP.ObtenerDatos", "" , &reply)
 
 	client.Call("APP.RegistrarUsuario", nickname , &reply )
 	log.Println("Bienvenido " + nickname + "\n")
 
-
-	fmt.Println("Usuarios ON:")
-	for i := range reply.Usuarios {
-
-		if reply.Usuarios[i] == nickname {
-			fmt.Println(reply.Usuarios[i] + " (Yo)") 
-		} else {
-			fmt.Println(reply.Usuarios[i])
-		} 
-	}
-
 	fmt.Println("")
 
 	fmt.Println("Si quieres salir del chat, ingresa el comando '/salir'")
-
-	fmt.Println("")
+	fmt.Println("Para ver los comandos existentes ingresa '/help'")
 
 	mainLoop(lector, client, nickname, reply)
 
